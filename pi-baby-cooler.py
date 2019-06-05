@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # This code was originally wrote By Wesley Archer (@raspberrycoulis) with the initial use 
-# of turning Phillips Hue bulbs on and off with a light reading from the envrio-pHAT 
+# of turning Phillips Hue bulbs on and off with a light reading from the enviro-pHAT 
 # but I have modified it to work with heat and fans. 
 
 # Orginal code can be found here: https://github.com/pimoroni/enviro-phat/blob/master/examples/advanced/pi-lluminate.py
