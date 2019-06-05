@@ -1,7 +1,13 @@
 #!/usr/bin/env python
 
-# Use the Enviro pHAT to check how much light is in a room, then trigger a webhook to control
-# Philips Hue lights via IFTTT. By Wesley Archer (@raspberrycoulis).
+# This code was originally wrote By Wesley Archer (@raspberrycoulis) with the initial use 
+# of turning Phillips Hue bulbs on and off with a light reading from the envrio-pHAT 
+# but I have modified it to work with heat and fans. 
+
+# Orginal code can be found here: https://github.com/pimoroni/enviro-phat/blob/master/examples/advanced/pi-lluminate.py
+
+# Use the Enviro pHAT to check the temperature in a room, then trigger a webhook to control a smart plug
+# via IFTTT. 
 
 # Import the relevant modules
 
