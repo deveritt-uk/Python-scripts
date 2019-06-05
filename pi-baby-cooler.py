@@ -2,7 +2,7 @@
 
 # This code was originally wrote By Wesley Archer (@raspberrycoulis) with the initial use 
 # of turning Phillips Hue bulbs on and off with a light reading from the enviro-pHAT 
-# but I have modified it to work with heat and fans. 
+# but I have modified it to work with heat and fans. This also sends Pushover notifications to keep users informed.
 
 # Orginal code can be found here: https://github.com/pimoroni/enviro-phat/blob/master/examples/advanced/pi-lluminate.py
 
@@ -15,7 +15,40 @@ import requests
 import time
 import datetime
 import os
+import httplib, urllib
 from envirophat import weather
+
+# For Pushover notifications - you'll need to create an app via pushover.net first
+APP_TOKEN = 'ADD_YOURS_HERE'    # The app token - required for Pushover
+USER_TOKEN = 'ADD_YOURS_HERE'   # Ths user token - required for Pushover
+
+# Get Pushover alerts when the temperature is high - customise the title, message and sound if needed:
+def pushover_hot():
+    conn = httplib.HTTPSConnection("api.pushover.net:443")
+    conn.request("POST", "/1/messages.json",
+      urllib.urlencode({
+        "token": APP_TOKEN,                         # Insert app token here
+        "user": USER_TOKEN,                         # Insert user token here
+        "html": "1",                                # 1 for HTML, 0 to disable
+        "title": "Fan on!",                    	    # Title of the message
+        "message": "<b>It is hot in the baby's room!</b>",      # Content of the message
+        "sound": "siren",                           # Define the sound played
+      }), { "Content-type": "application/x-www-form-urlencoded" })
+    conn.getresponse()
+
+# Get Pushover alerts when the temperature is cooler - customise the title, message and sound if needed:
+def pushover_cold():
+    conn = httplib.HTTPSConnection("api.pushover.net:443")
+    conn.request("POST", "/1/messages.json",
+      urllib.urlencode({
+        "token": APP_TOKEN,                         # Insert app token here
+        "user": USER_TOKEN,                         # Insert user token here
+        "html": "1",                                # 1 for HTML, 0 to disable
+        "title": "Fan off!",                    	    # Title of the message
+        "message": "<b>It is cooler in the baby's room now!</b>",      # Content of the message
+        "sound": "falling",                           # Define the sound played
+      }), { "Content-type": "application/x-www-form-urlencoded" })
+    conn.getresponse()
 
 # Get the current time for displaying in the terminal.
 def whats_the_time():
@@ -48,7 +81,7 @@ def turn_on():
 # be turned on or off.
 
 def average_temp():
-    # Variables for calculating the average lux levels
+    # Variables for calculating the average temperature levels
     start_time = time.time()
     curr_time = time.time()
     collect_temp_time = 60
@@ -73,20 +106,23 @@ def average_temp():
 
 try:
     # Local variables.
-    fan_on = False # Sets the state for the switch.
-    low = 20	      # Low value for light level (lux).
-    high = 24	      # High value for light level (lux).
-    period = 120      # Delay, in seconds, between calls.
+    state = 0    # Sets the state for the switch
+    low = 20	 # Low value for temperature level (celcius).
+    high = 24	 # High value for temperature level (celcius).
+    period = 120 # Delay, in seconds, between calls.
     while True:
-	# Get the average temperature level first,
+	# Get the average temperature level first:
 	room_temperature = average_temp()
-	# Now check if the room is dark enough then turn on the lights.
-	if room_temperature > high and not fan_on:
+	# Now check if the room is warm enough then turn on the fan:
+	if room_temperature > high and state != 1:
 	    turn_on()
-	    fan_on = True
-	elif room_temperature < low and fan_on:
+	    pushover_hot()
+	    state = 1
+	# Or if it is now cool enough, turn off the fan:
+	elif room_temperature < low and state == 1:
 	    turn_off()
-	    fan_on = False
+	    pushover_cold()
+	    state = 0
 	print("Waiting {} seconds before trying again".format(period))
 	time.sleep(period)
 except KeyboardInterrupt:
